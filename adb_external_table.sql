@@ -1,4 +1,7 @@
 -- Add ACL for Horizon Snowflake endpoint (new hostname)
+IMPORTANT:
+DBMS_CATALOG requires ‘http’ and ‘http_proxy’ privileges — not just ‘connect’ and ‘resolve’. 
+Missing http_proxy causes silent failures.
 
 BEGIN
   DBMS_NETWORK_ACL_ADMIN.APPEND_HOST_ACE(
@@ -12,6 +15,8 @@ BEGIN
 END;
 /
 
+  
+  
 -- verify
 
 select * from DBA_HOST_ACES WHERE PRINCIPAL = 'ADMIN' ORDER BY HOST;
