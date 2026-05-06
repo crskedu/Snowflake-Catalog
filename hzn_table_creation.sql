@@ -183,7 +183,7 @@ export SNOW_OAUTH_TOKEN=$(curl -s -X POST \
   -H "Content-Type: application/x-www-form-urlencoded" \
   --data-urlencode "grant_type=client_credentials" \
   --data-urlencode "scope=session:role:ADB_HZN_ROLE" \
-  --data-urlencode  "client_secret=sA" \
+  --data-urlencode  "client_secret=<PAT_TOKEN>" \
   | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
 
 # Step 6b — Verify the token was captured
