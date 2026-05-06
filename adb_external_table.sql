@@ -145,4 +145,55 @@ SELECT * FROM CRSK_SALES_HZ_EXT;
 select * from CRSK_ORDERS_HZ_EXT;
 
 
+-- Full JOIN across all three Horizon Iceberg external tables
+SELECT
+    c.CUSTOMER_ID,
+    c.FULL_NAME,
+    c.CITY,
+    c.COUNTRY,
+    s.SALE_ID,
+    s.PRODUCT,
+    s.QUANTITY,
+    s.AMOUNT       AS SALE_AMOUNT,
+    s.SALE_DATE,
+    s.REGION,
+    o.ORDER_ID,
+    o.ORDER_DATE,
+    o.SHIP_DATE,
+    o.STATUS       AS ORDER_STATUS,
+    o.TOTAL        AS ORDER_TOTAL
+FROM
+    CRSK_CUSTOMERS_HZ_EXT  c
+    JOIN CRSK_SALES_HZ_EXT   s ON c.CUSTOMER_ID = s.CUSTOMER_ID
+    JOIN CRSK_ORDERS_HZ_EXT  o ON s.SALE_ID     = o.SALE_ID
+ORDER BY
+    c.CUSTOMER_ID, s.SALE_ID;
 
+
+Expected: 10 rows with customer details, product info and order status joined correctly across all three tables.
+
+-- Aggregation Query — Business Summary Validation 
+-- Sales summary by region and order status
+SELECT
+    c.COUNTRY,
+    s.REGION,
+    o.STATUS                        AS ORDER_STATUS,
+    COUNT(DISTINCT c.CUSTOMER_ID)   AS TOTAL_CUSTOMERS,
+    COUNT(s.SALE_ID)                AS TOTAL_SALES,
+    SUM(s.AMOUNT)                   AS TOTAL_SALE_AMOUNT,
+    ROUND(AVG(s.AMOUNT), 2)         AS AVG_SALE_AMOUNT,
+    MIN(s.SALE_DATE)                AS FIRST_SALE_DATE,
+    MAX(s.SALE_DATE)                AS LAST_SALE_DATE
+FROM
+    CRSK_CUSTOMERS_HZ_EXT  c
+    JOIN CRSK_SALES_HZ_EXT   s ON c.CUSTOMER_ID = s.CUSTOMER_ID
+    JOIN CRSK_ORDERS_HZ_EXT  o ON s.SALE_ID     = o.SALE_ID
+GROUP BY
+    c.COUNTRY,
+    s.REGION,
+    o.STATUS
+ORDER BY
+    TOTAL_SALE_AMOUNT DESC;
+    
+     -- Expected: Grouped rows by country/region/status showing meaningful sales totals — highest amounts at top.
+  
